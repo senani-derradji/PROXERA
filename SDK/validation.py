@@ -1,14 +1,15 @@
 from pydantic import BaseModel, field_validator, model_validator
 from typing import Optional
-import os
+import os, sys
+from pathlib import Path
 
 max_size = 5_000_000
-providers = ['AZURE', 'GCP', 'AWS']
-data_types = [".jpg", ".jpeg", ".png", ".gif", ".bmp",".tif", ".tiff", ".webp", ".svg", ".heic", ".heif"]
+cloud_providers = ['AZURE', 'GCP', 'AWS']
+cloud_personal  = ['google_drive']
+data_accepted_types = ["jpg", "jpeg", "png",
+                       "pdf", "txt", "key", "bin", ]
 
-def is_valid_file_type(path: str) -> bool:
-    return path.lower().endswith(tuple(data_types))
-
+def is_valid_file_type(path: str) -> bool: return path.lower().endswith(tuple(data_accepted_types))
 
 class DataPayload(BaseModel):
     data: bytes
@@ -21,3 +22,29 @@ class DataPayload(BaseModel):
         if len(value) > max_size:
             raise ValueError("Data Payload is Too Long")
         return value
+
+
+class DataTypeValidate(BaseModel):
+    file_path: Path
+
+    @field_validator("file_path")
+    def validate_file_path(cls, value):
+        if not value:
+            raise ValueError("File path must not be empty.")
+        if not isinstance(value, Path):
+            raise TypeError("File path must be of type Path.")
+        if not value.exists():
+            raise FileNotFoundError(f"File not found at {value}")
+        if not is_valid_file_type(str(value)):
+            raise ValueError("File Type Not Supported")
+        return value
+
+class DataTypes(BaseModel):
+    data_type: str
+
+    @field_validator("data_type")
+    def validate_data_type(cls, value):
+        if value.lower() not in data_accepted_types:
+            raise ValueError("Data Type Not Supported")
+        return value.lower()
+
