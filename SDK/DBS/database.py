@@ -3,9 +3,22 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
+from SDK.general_utils import PathManager
 
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///crypteria.db")
+p_m = PathManager.get_appdata_path()
+
+data_dir = p_m / "data"
+
+if not data_dir.exists(): data_dir.mkdir(parents=True) ; db_path = data_dir / "crypteria.db"
+else: db_path = data_dir / "crypteria.db"
+
+if not db_path.exists(): db_path.touch()
+
+Base = declarative_base()
+
+
+DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{db_path.as_posix()}")
 
 engine = create_engine(
     DATABASE_URL,
@@ -17,5 +30,3 @@ SessionLocal = sessionmaker(
     autoflush=False,
     bind=engine
 )
-
-Base = declarative_base()
