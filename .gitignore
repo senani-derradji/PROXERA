@@ -7,5 +7,12 @@ test*
 *.txt
 *.json
 *.db
+*env
+venv
+*test*
+*.jpg
+*.txt
+
+
 # SDK/*
 

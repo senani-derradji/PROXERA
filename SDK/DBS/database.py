@@ -3,7 +3,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
-from SDK.general_utils import PathManager
+from SDK.UTILS.general_utils import PathManager
 
 
 p_m = PathManager.get_appdata_path()
@@ -17,7 +17,7 @@ if not db_path.exists(): db_path.touch()
 
 Base = declarative_base()
 
-
+# ------------------------------------ NOTE ---------------------------------------
 DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{db_path.as_posix()}")
 
 engine = create_engine(

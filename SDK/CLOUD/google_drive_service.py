@@ -7,7 +7,7 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 from googleapiclient.http import MediaIoBaseDownload
 import io, keyring, json
-from SDK.general_utils import PathManager
+from SDK.UTILS.general_utils import PathManager
 from SDK.SERVICES.logs_service import logger
 
 
@@ -15,6 +15,7 @@ SERVICE = "CrypteriaGoogleDrive"
 SCOPES = ["https://www.googleapis.com/auth/drive.file"]
 
 def authenticate():
+    
     data = keyring.get_password(SERVICE, "credentials")
     creds = None
 
@@ -43,8 +44,8 @@ def authenticate():
 
 
 def upload_to_drive(file_path, file_name=None, folder_id=None):
+
     creds = authenticate()
-    print(creds)
     service = build('drive', 'v3', credentials=creds)
     if file_name is None: file_name = os.path.basename(file_path)
     file_metadata = {'name': file_name}
@@ -70,16 +71,15 @@ def list_files(page_size=10):
     results = service.files().list(pageSize=page_size, fields="nextPageToken, files(id, name)").execute()
     items = results.get('files', [])
 
-    if not items:
-        print('No files found.') ; return []
-    print('Files:')
-    for item in items:
-        print(f"{item['name']} (ID: {item['id']})")
+    if not items:print('No files found.') ; return []
+    for item in items: print(f"{item['name']} (ID: {item['id']})")
+
     return items
 
 
 
 def download_file(file_id):
+
     creds = authenticate()
     service = build('drive', 'v3', credentials=creds)
 
@@ -90,8 +90,10 @@ def download_file(file_id):
 
     request = service.files().get_media(fileId=file_id)
     fh = io.FileIO(destination_path, 'wb')
+
     downloader = MediaIoBaseDownload(fh, request)
     done = False
+
     while not done:
         status, done = downloader.next_chunk()
         print(f"Download {int(status.progress() * 100)}.")
